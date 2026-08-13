@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="覆盖78张牌、牌阵、自助抽牌、结构化解牌、进阶方法与分级题库的塔罗互动学习系统。" />
+  <title>塔罗研习室｜互动学习系统</title>
+  <style>
+    :root {
+      --ink: #19202d;
+      --muted: #667085;
+      --paper: #fbfaf7;
+      --card: rgba(255,255,255,.88);
+      --line: #e4e0d8;
+      --navy: #263653;
+      --violet: #67518d;
+      --violet-2: #846caf;
+      --gold: #c99e50;
+      --gold-soft: #f8edcf;
+      --blue-soft: #edf2fa;
+      --red-soft: #fbefed;
+      --green-soft: #eaf5ef;
+      --shadow: 0 18px 50px rgba(29, 32, 45, .09);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 5%, rgba(201,158,80,.15), transparent 28rem),
+        radial-gradient(circle at 88% 18%, rgba(103,81,141,.12), transparent 26rem),
+        var(--paper);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      line-height: 1.68;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    .skip {
+      position: fixed; left: 12px; top: -60px; z-index: 100;
+      padding: 10px 14px; background: #fff; border-radius: 10px;
+    }
+    .skip:focus { top: 12px; }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      backdrop-filter: blur(18px);
+      background: rgba(251,250,247,.78);
+      border-bottom: 1px solid rgba(228,224,216,.85);
+    }
+    .topbar-inner {
+      min-height: 68px; display: flex; align-items: center; gap: 18px;
+    }
+    .brand { display:flex; align-items:center; gap:10px; font-weight: 800; white-space: nowrap; }
+    .brand-mark {
+      width: 34px; height: 42px; border-radius: 9px;
+      border: 1px solid rgba(103,81,141,.35);
+      background: linear-gradient(145deg, #fff, #eee8f5);
+      display:grid; place-items:center; color: var(--violet); font-family: Georgia, serif;
+      box-shadow: 0 6px 18px rgba(103,81,141,.13);
+    }
+    nav { display:flex; gap: 5px; overflow-x:auto; margin-left:auto; }
+    nav a { text-decoration:none; color:var(--muted); padding:9px 11px; border-radius:12px; font-size: 14px; white-space: nowrap; }
+    nav a:hover, nav a:focus-visible { color:var(--violet); background:#f0ecf6; outline:none; }
+    .print-btn, .ghost-btn, .primary-btn {
+      border: 1px solid var(--line); background:#fff; border-radius: 12px; padding: 9px 13px; cursor:pointer;
+    }
+    .print-btn:hover, .ghost-btn:hover { border-color:#b9adca; background:#f8f5fb; }
+    .primary-btn { color:#fff; background:var(--violet); border-color:var(--violet); font-weight:700; }
+    .primary-btn:hover { background:#574275; }
+    .hero { padding: 72px 0 38px; }
+    .eyebrow { color: var(--violet); font-weight:800; letter-spacing:.13em; text-transform: uppercase; font-size: 13px; }
+    h1 { max-width: 830px; margin: 10px 0 14px; color:var(--navy); font-family: Georgia, "Microsoft YaHei", serif; font-size: clamp(38px, 7vw, 72px); line-height: 1.06; letter-spacing:-.035em; }
+    .lead { max-width: 760px; color:var(--muted); font-size: clamp(16px, 2vw, 20px); margin:0 0 26px; }
+    .hero-grid { display:grid; grid-template-columns: 1.3fr .7fr; gap:18px; align-items:stretch; }
+    .study-console, .principle-card {
+      background:var(--card); border:1px solid rgba(228,224,216,.9); border-radius:var(--radius); box-shadow:var(--shadow);
+    }
+    .study-console { padding:20px; }
+    .principle-card { padding:24px; background:linear-gradient(150deg,#2a3a59,#533f72); color:#fff; position:relative; overflow:hidden; }
+    .principle-card::after { content:"✦"; position:absolute; right:18px; bottom:-25px; font-size:110px; color:rgba(255,255,255,.07); }
+    .principle-card h2 { margin:0 0 8px; font-family:Georgia,serif; font-size:24px; }
+    .principle-card p { margin:0; color:rgba(255,255,255,.8); }
+    .search-wrap { position:relative; }
+    #search { width:100%; padding:15px 48px 15px 16px; border:1px solid var(--line); background:#fff; border-radius:15px; outline:none; }
+    #search:focus { border-color:var(--violet-2); box-shadow:0 0 0 4px rgba(103,81,141,.11); }
+    .search-icon { position:absolute; right:16px; top:12px; color:var(--muted); font-size:20px; }
+    .console-row { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-top:13px; }
+    .progress-text { color:var(--muted); font-size:14px; }
+    .progress-bar { height:7px; width:180px; background:#eeeae2; border-radius:999px; overflow:hidden; }
+    #progressFill { height:100%; width:0; background:linear-gradient(90deg,var(--gold),var(--violet)); transition:width .25s ease; }
+    .section { padding: 42px 0; scroll-margin-top:80px; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .kicker { color:var(--violet); font-weight:800; font-size:13px; letter-spacing:.12em; text-transform:uppercase; }
+    h2.section-title { margin:2px 0 0; color:var(--navy); font-family:Georgia,"Microsoft YaHei",serif; font-size:clamp(28px,4vw,42px); line-height:1.15; }
+    .section-desc { margin:0; max-width:560px; color:var(--muted); }
+    .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+    .filter { border:1px solid var(--line); background:rgba(255,255,255,.7); border-radius:999px; padding:8px 13px; cursor:pointer; color:var(--muted); }
+    .filter.active { color:#fff; background:var(--violet); border-color:var(--violet); }
+    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .tarot-card {
+      border:1px solid var(--line); background:var(--card); border-radius:20px; padding:0; text-align:left; cursor:pointer; overflow:hidden;
+      box-shadow:0 8px 24px rgba(33,33,50,.055); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .tarot-card:hover { transform:translateY(-3px); box-shadow:0 18px 38px rgba(33,33,50,.10); border-color:#c7bdd4; }
+    .tarot-card:focus-visible { outline:3px solid rgba(103,81,141,.28); outline-offset:2px; }
+    .card-top { min-height:114px; display:flex; align-items:flex-start; justify-content:space-between; padding:17px; background:linear-gradient(150deg,#f7f3ea,#f0ecf6); }
+    .card-visual { min-height:260px; padding:14px; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg,#f7f3ea,#f0ecf6); position:relative; }
+    .card-visual .roman { position:absolute; left:16px; top:14px; z-index:1; text-shadow:0 1px 0 #fff; }
+    .card-visual .learned-dot { position:absolute; right:14px; top:14px; z-index:1; }
+    .tarot-img { display:block; width:136px; height:232px; border-radius:7px; border:1px solid rgba(54,46,38,.28); background-color:#efe9da; background-image:url('rws-major-arcana-public-domain.png'); background-repeat:no-repeat; background-size:calc(768px * var(--scale,1.29)) calc(785px * var(--scale,1.29)); background-position:calc(var(--x) * var(--scale,1.29) * -1px) calc(var(--y) * var(--scale,1.29) * -1px); box-shadow:0 12px 26px rgba(35,30,25,.18); }
+    .modal-layout { display:grid; grid-template-columns:220px 1fr; gap:22px; align-items:start; }
+    .modal-image-wrap { position:sticky; top:98px; }
+    .modal-image-wrap .tarot-img { width:210px; height:360px; border-radius:10px; --scale:2; }
+    .level-tabs { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+    .level-tab { border:1px solid var(--line); padding:8px 12px; border-radius:999px; background:#fff; cursor:pointer; color:var(--muted); font-weight:700; }
+    .level-tab.active { color:#fff; background:var(--violet); border-color:var(--violet); }
+    .level-panel[hidden] { display:none; }
+    .symbol-list { margin:7px 0 0; padding-left:20px; }
+    .symbol-list li { margin:5px 0; }
+    .method-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .method-card { padding:20px; border:1px solid var(--line); border-radius:18px; background:var(--card); }
+    .method-card h3 { margin:0 0 8px; color:var(--navy); }
+    .confidence { display:flex; gap:7px; margin-top:10px; }
+    .confidence span { height:8px; flex:1; border-radius:999px; background:#e5e1da; }
+    .confidence .on { background:linear-gradient(90deg,var(--gold),var(--violet)); }
+    .source-note { font-size:13px; color:var(--muted); margin-top:16px; }
+    .roman { color:var(--violet); font-family:Georgia,serif; font-size:30px; font-weight:700; }
+    .learned-dot { display:none; padding:4px 8px; border-radius:999px; background:var(--green-soft); color:#29744c; font-size:12px; font-weight:800; }
+    .tarot-card.learned .learned-dot { display:block; }
+    .card-body { padding:16px 17px 17px; }
+    .card-body h3 { margin:0; color:var(--navy); font-size:20px; }
+    .en { color:var(--muted); font-family:Georgia,serif; font-size:13px; }
+    .action { margin:11px 0 0; font-weight:700; }
+    .tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:13px; }
+    .tag { padding:4px 8px; background:var(--blue-soft); color:#415879; border-radius:8px; font-size:12px; }
+    .empty { grid-column:1/-1; padding:45px; text-align:center; border:1px dashed #cfc7bb; border-radius:20px; color:var(--muted); }
+    .knowledge-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    details.knowledge { background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+    details.knowledge[open] { box-shadow:var(--shadow); }
+    details.knowledge summary { list-style:none; cursor:pointer; padding:19px 20px; font-weight:800; color:var(--navy); display:flex; align-items:center; justify-content:space-between; }
+    details.knowledge summary::-webkit-details-marker { display:none; }
+    details.knowledge summary::after { content:"＋"; color:var(--violet); font-size:22px; }
+    details.knowledge[open] summary::after { content:"－"; }
+    .knowledge-content { padding:0 20px 20px; color:#394150; }
+    .knowledge-content p:first-child { margin-top:0; }
+    .mini-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .mini-table th, .mini-table td { border-bottom:1px solid var(--line); padding:10px 8px; text-align:left; vertical-align:top; }
+    .mini-table th { color:var(--violet); white-space:nowrap; }
+    .boundary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .level-card { padding:21px; border-radius:18px; border:1px solid var(--line); background:#fff; }
+    .level-card strong { display:block; margin-bottom:8px; font-size:18px; }
+    .level-a { background:var(--green-soft); }
+    .level-b { background:var(--gold-soft); }
+    .level-c { background:var(--red-soft); }
+    .compare-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    .compare-card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px; }
+    .compare-card h3 { margin:0 0 12px; color:var(--navy); }
+    .compare-line { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:9px; padding:10px 0; border-top:1px solid var(--line); }
+    .compare-line span:nth-child(2) { color:var(--gold); font-family:Georgia,serif; }
+    .quiz { background:linear-gradient(145deg,#273855,#5a4479); color:#fff; border-radius:26px; padding:28px; box-shadow:var(--shadow); }
+    .quiz h3 { margin:0 0 8px; font-size:24px; }
+    .quiz p { color:rgba(255,255,255,.8); }
+    .quiz-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .quiz .ghost-btn { background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.3); }
+    #quizAnswer { margin-top:16px; padding:16px; border-radius:14px; background:rgba(255,255,255,.1); display:none; }
+    .lab-shell { background:var(--card); border:1px solid var(--line); border-radius:26px; padding:22px; box-shadow:var(--shadow); }
+    .lab-toolbar { display:grid; grid-template-columns:1.4fr 1fr 1fr auto; gap:10px; align-items:end; }
+    .field label, .field-title { display:block; margin-bottom:6px; color:var(--navy); font-size:13px; font-weight:800; }
+    .field input, .field select, .field textarea, .quiz-select { width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; padding:11px 12px; color:var(--ink); outline:none; }
+    .field input:focus, .field select:focus, .field textarea:focus, .quiz-select:focus { border-color:var(--violet-2); box-shadow:0 0 0 4px rgba(103,81,141,.10); }
+    .field textarea { min-height:110px; resize:vertical; }
+    .spread-catalog { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+    .spread-option { border:1px solid var(--line); background:#fff; border-radius:17px; padding:16px; text-align:left; cursor:pointer; }
+    .spread-option.active { border-color:var(--violet); box-shadow:0 0 0 3px rgba(103,81,141,.10); background:#f9f7fc; }
+    .spread-option strong { display:block; color:var(--navy); }
+    .spread-option small { display:block; color:var(--muted); margin-top:5px; line-height:1.5; }
+    .spread-preview { display:flex; gap:7px; align-items:end; min-height:58px; margin-top:10px; }
+    .spread-preview i { width:27px; height:44px; border-radius:5px; background:linear-gradient(145deg,#2d3e60,#725791); border:1px solid rgba(255,255,255,.4); box-shadow:0 4px 8px rgba(32,36,50,.12); }
+    .spread-preview i:nth-child(even) { transform:translateY(-8px); }
+    .spread-theory { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .theory-card { border:1px solid var(--line); border-radius:16px; padding:17px; background:#fff; }
+    .theory-card h3 { margin:0 0 8px; color:var(--navy); }
+    .theory-card p, .theory-card li { color:#485163; }
+    .reading-board { margin-top:18px; display:grid; gap:14px; grid-template-columns:repeat(var(--spread-cols,3),minmax(0,1fr)); }
+    .draw-slot { min-width:0; padding:13px; border:1px solid var(--line); border-radius:18px; background:linear-gradient(150deg,#fff,#f7f4fb); text-align:center; }
+    .slot-label { min-height:42px; color:var(--violet); font-weight:800; font-size:13px; }
+    .draw-card-art { min-height:205px; display:grid; place-items:center; margin:8px 0; }
+    .minor-art { width:118px; height:202px; object-fit:cover; border-radius:8px; border:1px solid rgba(54,46,38,.25); box-shadow:0 12px 25px rgba(35,30,25,.17); background:#e8e1d4; }
+    .card-visual .minor-art { width:136px; height:232px; }
+    .modal-image-wrap .minor-art { width:210px; height:360px; }
+    .minor-art.reversed, .draw-slot .tarot-img.reversed { transform:rotate(180deg); }
+    .draw-name { color:var(--navy); font-weight:800; }
+    .draw-meta { color:var(--muted); font-size:12px; }
+    .draw-hint { display:none; margin-top:10px; text-align:left; border-top:1px solid var(--line); padding-top:10px; font-size:13px; }
+    .draw-hint.show { display:block; }
+    .draw-hint b { color:var(--violet); }
+    .reading-actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:16px; }
+    .reading-notes { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .analysis-frame { padding:16px; border:1px solid var(--line); border-radius:16px; background:var(--blue-soft); }
+    .analysis-frame ol { margin:8px 0 0; padding-left:20px; }
+    .journal { margin-top:14px; }
+    .journal details { margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:13px; padding:10px 13px; }
+    .curriculum-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; }
+    .curriculum-card { border:1px solid var(--line); border-radius:18px; padding:19px; background:var(--card); }
+    .curriculum-card h3 { margin:0 0 8px; color:var(--navy); }
+    .curriculum-card ul { margin:8px 0 0; padding-left:19px; color:#485163; }
+    .source-box { margin-top:14px; padding:18px; border-left:4px solid var(--gold); border-radius:0 16px 16px 0; background:#fffaf0; }
+    .source-box a { color:var(--violet); }
+    .quiz-controls { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:16px; }
+    .quiz-stat { color:rgba(255,255,255,.72); font-size:13px; margin-top:10px; }
+    .self-grade { display:none; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .self-grade.show { display:flex; }
+    .answer-structure { display:grid; gap:8px; grid-template-columns:repeat(3,1fr); margin-top:12px; }
+    .answer-structure div { padding:10px; border-radius:11px; background:rgba(255,255,255,.09); }
+    .answer-structure b { display:block; color:#f2d690; }
+    .deck-note { color:var(--muted); font-size:13px; margin-top:12px; }
+    footer { padding:48px 0 70px; color:var(--muted); border-top:1px solid var(--line); margin-top:40px; }
+    footer strong { color:var(--navy); }
+    dialog { width:min(780px,calc(100% - 24px)); max-height:88vh; padding:0; border:0; border-radius:24px; box-shadow:0 30px 100px rgba(17,20,31,.3); color:var(--ink); }
+    dialog::backdrop { background:rgba(20,23,35,.56); backdrop-filter:blur(5px); }
+    .modal-head { position:sticky; top:0; z-index:2; padding:22px 24px; color:#fff; background:linear-gradient(145deg,#263653,#654c87); display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+    .modal-head h2 { margin:0; font-family:Georgia,"Microsoft YaHei",serif; font-size:30px; line-height:1.15; }
+    .modal-head p { margin:5px 0 0; color:rgba(255,255,255,.75); }
+    .close { width:38px; height:38px; border:1px solid rgba(255,255,255,.3); color:#fff; background:rgba(255,255,255,.1); border-radius:12px; cursor:pointer; font-size:22px; }
+    .modal-body { padding:24px; background:#fff; }
+    .info-block { padding:15px 17px; border-radius:14px; margin-bottom:11px; border:1px solid var(--line); }
+    .info-block h4 { margin:0 0 5px; color:var(--violet); }
+    .info-block p { margin:0; }
+    .info-core { background:var(--blue-soft); }
+    .info-risk { background:var(--red-soft); }
+    .info-safe { background:var(--green-soft); }
+    .modal-actions { display:flex; align-items:center; gap:10px; justify-content:space-between; margin-top:18px; }
+    .learn-btn.learned { color:#276e49; border-color:#9bcbb1; background:var(--green-soft); }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    @media (max-width: 850px) {
+      nav { display:none; }
+      .print-btn { margin-left:auto; }
+      .hero-grid { grid-template-columns:1fr; }
+      .cards { grid-template-columns:repeat(2,1fr); }
+      .knowledge-grid, .boundary-grid, .compare-grid { grid-template-columns:1fr; }
+      .method-grid { grid-template-columns:1fr; }
+      .lab-toolbar { grid-template-columns:1fr 1fr; }
+      .spread-catalog, .curriculum-grid { grid-template-columns:repeat(2,1fr); }
+      .reading-notes, .spread-theory { grid-template-columns:1fr; }
+    }
+    @media (max-width: 560px) {
+      .shell { width:min(100% - 22px,1180px); }
+      .hero { padding-top:48px; }
+      h1 { font-size:42px; }
+      .cards { grid-template-columns:1fr; }
+      .modal-layout { grid-template-columns:1fr; }
+      .modal-image-wrap { position:static; display:flex; justify-content:center; }
+      .modal-image-wrap .tarot-img { width:175px; height:300px; --scale:1.66; }
+      .modal-image-wrap .minor-art { width:175px; height:300px; }
+      .section { padding:34px 0; }
+      .section-head { align-items:start; flex-direction:column; }
+      .brand span:last-child { display:none; }
+      .progress-bar { width:130px; }
+      .compare-line { grid-template-columns:1fr; }
+      .compare-line span:nth-child(2) { display:none; }
+      dialog { max-height:94vh; }
+      .lab-toolbar, .quiz-controls, .spread-catalog, .curriculum-grid { grid-template-columns:1fr; }
+      .reading-board { grid-template-columns:1fr !important; }
+      .answer-structure { grid-template-columns:1fr; }
+    }
+    @media print {
+      .topbar, .study-console, .filters, .quiz, .print-btn, dialog, .learned-dot, #reading-lab { display:none !important; }
+      body { background:#fff; color:#000; font-size:10pt; }
+      .hero { padding:20px 0; }
+      h1 { font-size:30pt; }
+      .hero-grid { display:block; }
+      .principle-card { color:#000; background:#fff; border:1px solid #aaa; box-shadow:none; }
+      .principle-card p { color:#333; }
+      .cards { grid-template-columns:repeat(2,1fr); }
+      .tarot-card, details.knowledge, .compare-card, .level-card { break-inside:avoid; box-shadow:none; }
+      .card-visual { min-height:210px; }
+      .tarot-img { width:110px; height:188px; --scale:1.04; }
+      details.knowledge > * { display:block !important; }
+      .section { padding:18px 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">跳到主要内容</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-mark">T</span><span>塔罗研习室</span></div>
+      <nav aria-label="页面导航">
+        <a href="#cards">逐牌查阅</a><a href="#spreads">牌阵</a><a href="#reading-lab">抽牌实战</a><a href="#curriculum">精进课程</a><a href="#practice">题库</a>
+      </nav>
+      <button class="print-btn" type="button" onclick="window.print()">打印 / 存为 PDF</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell">
+      <div class="eyebrow">Tarot learning system · Version 2</div>
+      <h1>从认识牌义，走向<br>独立完成一场解读</h1>
+      <p class="lead">覆盖78张牌的抽取与组合训练，加入牌阵实验室、结构化自助解牌、经典体系精读、分级题库和错题记录。核心仍是：先观察，后解释；先写证据，再写故事。</p>
+      <div class="hero-grid">
+        <div class="study-console">
+          <label class="sr-only" for="search">搜索牌名、关键词或核心动作</label>
+          <div class="search-wrap">
+            <input id="search" type="search" placeholder="搜索：月亮、悬置、关系、边界……" autocomplete="off" />
+            <span class="search-icon" aria-hidden="true">⌕</span>
+          </div>
+          <div class="console-row">
+            <span id="resultCount" class="progress-text">共 21 张大牌</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span id="progressText" class="progress-text">已学 0 / 21</span>
+              <div class="progress-bar" aria-hidden="true"><div id="progressFill"></div></div>
+            </div>
+          </div>
+        </div>
+        <aside class="principle-card">
+          <h2>本手册的底层原则</h2>
+          <p>塔罗是一套象征与叙事框架，不替代事实核验、专业建议或他人的明确表达。解读强度不能高于证据强度。</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="cards" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Major Arcana</div><h2 class="section-title">大阿尔卡那 0—XX</h2></div>
+        <p class="section-desc">点击卡片查看：核心动作、常见误区、关系与工作语境、相似牌区分。当前课程详细学习至“审判”。</p>
+      </div>
+      <div class="filters" role="group" aria-label="牌义筛选">
+        <button class="filter active" data-filter="all">全部</button>
+        <button class="filter" data-filter="action">行动 / 选择</button>
+        <button class="filter" data-filter="inner">内在 / 观察</button>
+        <button class="filter" data-filter="structure">结构 / 判断</button>
+        <button class="filter" data-filter="change">变化 / 转化</button>
+        <button class="filter" data-filter="clarity">迷雾 / 清晰</button>
+        <button class="filter" data-filter="learned">已标记</button>
+      </div>
+      <div id="cardGrid" class="cards" aria-live="polite"></div>
+      <p class="source-note">牌图：Pamela Colman Smith 与 A. E. Waite，Rider–Waite–Smith Tarot（1909）；原始作品为公版。本页使用的合图来自 <a href="https://commons.wikimedia.org/wiki/File:Rider-Waite_Major_Arcana_full.png" target="_blank" rel="noreferrer">Wikimedia Commons</a>，已打包为本地资源。</p>
+    </section>
+
+    <section id="spreads" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Spread laboratory</div><h2 class="section-title">牌阵不是“多抽几张”，而是先规定句法</h2></div>
+        <p class="section-desc">每一个位置都是一个问题函数。先定义位置，再翻牌；先逐位作答，再做横向综合，能显著减少看到牌后临时编故事。</p>
+      </div>
+      <div class="lab-shell">
+        <div id="spreadCatalog" class="spread-catalog" aria-label="牌阵选择"></div>
+        <div class="spread-theory">
+          <article class="theory-card"><h3>牌阵设计四原则</h3><ol><li>一个位置只问一件事。</li><li>位置彼此不同，但共同服务总问题。</li><li>描述机制、资源与选择，少设“他到底怎样”的读心位。</li><li>张数只随问题复杂度增加，不随焦虑增加。</li></ol></article>
+          <article class="theory-card"><h3 id="spreadTheoryTitle">三张机制牌阵</h3><p id="spreadTheoryText">用“驱动—阻碍—可行行动”代替模糊的“过去—现在—未来”，更适合训练因果关系与现实落点。</p><p><b>综合顺序：</b>主轴 → 张力 → 重复元素 → 缺失元素 → 边界句。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="reading-lab" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Self reading lab</div><h2 class="section-title">自助抽牌与结构化解牌</h2></div>
+        <p class="section-desc">完整78张牌参与随机抽取。系统不替你宣判结果，而是给出位置、元素、数字与牌义提示，带你完成自己的证据链。</p>
+      </div>
+      <div class="lab-shell">
+        <div class="lab-toolbar">
+          <div class="field"><label for="readingQuestion">这次真正想理解什么？</label><input id="readingQuestion" placeholder="例：我该如何改善与同事的协作？" /></div>
+          <div class="field"><label for="spreadSelect">选择牌阵</label><select id="spreadSelect"></select></div>
+          <div class="field"><label for="deckScope">牌组范围</label><select id="deckScope"><option value="all">完整78张</option><option value="major">仅大阿尔卡那</option><option value="minor">仅小阿尔卡那</option></select></div>
+          <button id="drawCards" class="primary-btn" type="button">洗牌并抽取</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--muted);font-size:14px"><input id="useReversal" type="checkbox" /> 加入逆位训练（逆位视为能量受阻、过量、内化或需要修正，不机械取反）</label>
+        <div id="readingBoard" class="reading-board" aria-live="polite"><div class="empty">选好牌阵后开始抽牌。建议先写下问题，抽牌后先观察30秒，再打开提示。</div></div>
+        <div class="reading-actions"><button id="revealHints" class="ghost-btn" type="button" disabled>逐牌显示学习提示</button><button id="buildReference" class="ghost-btn" type="button" disabled>生成结构化参考</button><button id="saveReading" class="ghost-btn" type="button" disabled>保存本次练习</button></div>
+        <div class="reading-notes">
+          <div class="field"><label for="learnerReading">先写你的解读</label><textarea id="learnerReading" placeholder="建议按：牌面观察 → 位置翻译 → 组合关系 → 边界句。"></textarea></div>
+          <div id="referenceReading" class="analysis-frame"><b>结构化参考会显示在这里</b><ol><li>识别每张牌在当前位置的功能。</li><li>寻找主轴、冲突或递进关系。</li><li>区分明确支持、合理推测与待核实事实。</li></ol></div>
+        </div>
+        <p class="deck-note">小牌图像由 Wikimedia Commons 的 RWS 公版扫描按需加载；离线时仍可显示牌名、元素、数字结构和解读提示。</p>
+        <div id="readingJournal" class="journal"></div>
+      </div>
+    </section>
+
+    <section id="curriculum" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Serious study path</div><h2 class="section-title">从“背关键词”到建立自己的解读模型</h2></div>
+        <p class="section-desc">经典资料提供历史语境与原始牌义，现代训练负责把它们变成可操作、可复盘、不过界的阅读方法。经典不等于唯一答案，也不应脱离问题机械套用。</p>
+      </div>
+      <div class="curriculum-grid">
+        <article class="curriculum-card"><h3>阶段一｜图像与结构</h3><ul><li>78张总体结构、元素×数字矩阵</li><li>人物朝向、视线、距离、颜色与地景</li><li>只描述可观察事实，不急着解释</li></ul></article>
+        <article class="curriculum-card"><h3>阶段二｜位置化翻译</h3><ul><li>同一张牌放在原因、建议、趋势的动词变化</li><li>人物牌作为人、角色、态度或成熟度</li><li>逆位的四种机制，而非简单反义词</li></ul></article>
+        <article class="curriculum-card"><h3>阶段三｜组合语法</h3><ul><li>递进、因果、冲突、修复、内外、主次</li><li>元素密度与缺失、数字递进与回退</li><li>牌阵位置比单张关键词优先</li></ul></article>
+        <article class="curriculum-card"><h3>阶段四｜高阶建模</h3><ul><li>为同一组牌保留至少两种竞争性解释</li><li>写出支持证据、反证和置信度</li><li>用现实反馈校准个人偏差</li></ul></article>
+        <article class="curriculum-card"><h3>阶段五｜伦理与提问</h3><ul><li>把“他会不会”改写为可行动、可核实的问题</li><li>不替代医疗、法律、财务与安全判断</li><li>不把牌用于确诊、定罪或读取他人隐私</li></ul></article>
+        <article class="curriculum-card"><h3>阶段六｜刻意练习</h3><ul><li>盲读 → 揭示 → 自评 → 记录错误类型</li><li>同牌三语境、同题两牌阵、隔日重读</li><li>建立自己的语料库，而不是扩张绝对关键词</li></ul></article>
+      </div>
+      <div class="source-box"><b>经典参考基线：</b>本系统以 Rider–Waite–Smith 图像体系及 A. E. Waite《The Pictorial Key to the Tarot》（1911）为历史基线，再以结构化学习方法重新组织。可查阅 <a href="https://sacred-texts.com/tarot/pkt/pktcont.htm" target="_blank" rel="noreferrer">原书目录与全文</a>；牌面来自 <a href="https://commons.wikimedia.org/wiki/Category:Rider-Waite-Smith_tarot_deck_(TaionWC)" target="_blank" rel="noreferrer">Wikimedia Commons 公版图像集</a>。经典文本中部分占卜断语具有时代性，本系统不会把它们当作确定事实。</div>
+    </section>
+
+    <section id="advanced" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Advanced methodology</div><h2 class="section-title">进阶与高阶学习路径</h2></div>
+        <p class="section-desc">进阶不是增加更多绝对关键词；高阶也不是把故事讲得更玄。层级越高，越重视证据、替代解释与复盘。</p>
+      </div>
+      <div class="method-grid">
+        <article class="method-card"><h3>基础｜语义准确</h3><p>识别牌类、核心动作、常见误区，并能将牌义翻译到问题位置。</p><p><b>达标问题：</b>这张牌最少能支持什么？</p><div class="confidence" aria-label="基础层级"><span class="on"></span><span></span><span></span></div></article>
+        <article class="method-card"><h3>进阶｜图像与组合</h3><p>从画面提取可观察线索，建立递进、因果、张力、内外或修复关系；区分人物、状态和机制。</p><p><b>达标问题：</b>牌与牌之间是什么语法？</p><div class="confidence" aria-label="进阶层级"><span class="on"></span><span class="on"></span><span></span></div></article>
+        <article class="method-card"><h3>高阶｜竞争性解释</h3><p>同时保留至少两种解释，写出各自需要的现实证据、可能反证与置信度，并通过后续事实复盘。</p><p><b>达标问题：</b>什么事实会让我修改结论？</p><div class="confidence" aria-label="高阶层级"><span class="on"></span><span class="on"></span><span class="on"></span></div></article>
+      </div>
+    </section>
+
+    <section id="system" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Foundation</div><h2 class="section-title">基础知识体系</h2></div>
+        <p class="section-desc">按需展开。第一次学习建议从“78张牌结构”开始，再看四花色、数字和宫廷牌。</p>
+      </div>
+      <div class="knowledge-grid">
+        <details class="knowledge" open><summary>78张牌总体结构</summary><div class="knowledge-content">
+          <p><strong>78张 = 22张大阿尔卡那 + 56张小阿尔卡那。</strong>大牌偏向重大主题、阶段与转折；小牌描述日常领域里的具体过程。</p>
+          <table class="mini-table"><tr><th>系统</th><th>数量</th><th>主要回答</th></tr><tr><td>大阿尔卡那</td><td>22</td><td>处于什么重大主题或阶段？</td></tr><tr><td>数字牌</td><td>40</td><td>四个生活领域的过程如何展开？</td></tr><tr><td>宫廷牌</td><td>16</td><td>谁以何种角色、风格或成熟度参与？</td></tr></table>
+        </div></details>
+        <details class="knowledge"><summary>四元素与四花色</summary><div class="knowledge-content">
+          <table class="mini-table"><tr><th>花色</th><th>领域</th><th>常见动词</th><th>过量风险</th></tr><tr><td>权杖 / 火</td><td>行动、欲望、创意</td><td>启动、争取、扩张</td><td>冲动、耗竭</td></tr><tr><td>圣杯 / 水</td><td>情感、关系、体验</td><td>感受、接纳、交换</td><td>理想化、沉溺</td></tr><tr><td>宝剑 / 风</td><td>思维、沟通、判断</td><td>分析、表达、切分</td><td>焦虑、争执</td></tr><tr><td>星币 / 土</td><td>物质、身体、资源</td><td>积累、落实、维护</td><td>僵化、过度保守</td></tr></table>
+          <p>花色只是在定位主要层面，不是把现实事件锁死为单一类别。</p>
+        </div></details>
+        <details class="knowledge"><summary>数字 1—10</summary><div class="knowledge-content">
+          <table class="mini-table"><tr><th>数字</th><th>结构</th><th>数字</th><th>结构</th></tr><tr><td>1</td><td>种子、起点、潜能</td><td>6</td><td>调整、恢复、交换</td></tr><tr><td>2</td><td>二元、配对、权衡</td><td>7</td><td>检验、策略、评估</td></tr><tr><td>3</td><td>生长、协作、扩展</td><td>8</td><td>组织、推进、熟练</td></tr><tr><td>4</td><td>结构、稳定、维持</td><td>9</td><td>临近完成、积累</td></tr><tr><td>5</td><td>扰动、摩擦、缺口</td><td>10</td><td>完成、总量、周期终点</td></tr></table>
+          <p><strong>最小公式：</strong>花色定领域 × 数字定阶段 × 牌阵位置定句法 × 相邻牌作修正。</p>
+        </div></details>
+        <details class="knowledge"><summary>宫廷牌基础</summary><div class="knowledge-content">
+          <table class="mini-table"><tr><th>位阶</th><th>核心动作</th><th>常见误区</th></tr><tr><td>侍从</td><td>接触、学习、尝试</td><td>一律读成孩子或消息</td></tr><tr><td>骑士</td><td>把元素带向行动</td><td>一律读成追求者</td></tr><tr><td>王后</td><td>内化并稳定承载元素</td><td>只按女性/母亲解</td></tr><tr><td>国王</td><td>外化管理并负责运用</td><td>只按男性/领导解</td></tr></table>
+          <p>宫廷牌可以是人物、行为风格或任务角色。问题不是在问“谁”时，先用行为方式解读。</p>
+        </div></details>
+        <details class="knowledge"><summary>单牌五步法</summary><div class="knowledge-content">
+          <ol><li>复述问题：原因、现状、建议、态度还是趋势？</li><li>识别牌类：大牌主题；小牌领域与阶段；宫廷牌角色。</li><li>写核心动作：用动词短语，不堆关键词。</li><li>翻译到语境：不新增人物、事件、时间与结局。</li><li>加边界句：明确这张牌暂时不能回答什么。</li></ol>
+          <p><strong>模板：</strong>这张牌首先显示【核心动作】。放在【问题位置】中，更稳妥地表示【语境解释】。它可以推测【可能性】，但不能仅凭此确定【边界】。</p>
+        </div></details>
+        <details class="knowledge"><summary>两张 / 三张组合</summary><div class="knowledge-content">
+          <p><strong>两张牌的六种关系：</strong>递进、因果、加强、冲突、内外分工、问题—修复。</p>
+          <table class="mini-table"><tr><th>关系</th><th>例子</th><th>主线</th></tr><tr><td>递进</td><td>倒吊人 → 死神</td><td>悬置使旧模式走到尽头</td></tr><tr><td>冲突</td><td>愚人 ↔ 教皇</td><td>自由与正式结构拉扯</td></tr><tr><td>内外</td><td>战车 + 力量</td><td>对外推进，同时对内克制</td></tr><tr><td>修复</td><td>高塔 → 星星</td><td>冲击后恢复信任与方向</td></tr></table>
+          <p>三张牌先给每张一个功能：驱动—过程—表现，或主题—限制—应对。最后必须写“不能确定什么”。</p>
+        </div></details>
+      </div>
+    </section>
+
+    <section id="boundary" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Evidence boundary</div><h2 class="section-title">三层推断边界</h2></div>
+        <p class="section-desc">把牌面视为有限证据，把解读视为带不确定性的假设。结论强度不能高于证据强度。</p>
+      </div>
+      <div class="boundary-grid">
+        <article class="level-card level-a"><strong>A｜牌面明确支持</strong><p>直接来自核心牌义、问题位置与组合关系。</p><p><b>措辞：</b>显示、强调、处于、倾向。</p><p><b>月亮：</b>当前信息不清，情绪和直觉可能影响判断。</p></article>
+        <article class="level-card level-b"><strong>B｜合理推测</strong><p>与牌义相容，但还存在其他解释。</p><p><b>措辞：</b>可能、或许、较容易、可表现为。</p><p><b>月亮：</b>可能有人没有说清楚，或双方理解有偏差。</p></article>
+        <article class="level-card level-c"><strong>C｜越界结论</strong><p>需要额外事实，却被写成确定剧情。</p><p><b>警报词：</b>一定、必然、就是、百分之百。</p><p><b>月亮：</b>“他一定出轨/撒谎”——牌面不足以支持。</p></article>
+      </div>
+    </section>
+
+    <section id="compare" class="section shell">
+      <div class="section-head">
+        <div><div class="kicker">Compare</div><h2 class="section-title">高频相似牌辨析</h2></div>
+        <p class="section-desc">不要只看共同表象，要问：它为什么这样？控制什么？变化如何发生？</p>
+      </div>
+      <div class="compare-grid">
+        <article class="compare-card"><h3>三种“不行动”</h3><div class="compare-line"><span><b>女祭司</b><br>有内容但不表达</span><span>✦</span><span>“我不说，先观察。”</span></div><div class="compare-line"><span><b>隐士</b><br>抽离噪声独自求证</span><span>✦</span><span>“我要自己想清楚。”</span></div><div class="compare-line"><span><b>倒吊人</b><br>原方式推不动</span><span>✦</span><span>“先停下来换角度。”</span></div></article>
+        <article class="compare-card"><h3>三种“规则/判断”</h3><div class="compare-line"><span><b>皇帝</b><br>职位、责任、控制权</span><span>✦</span><span>建立并执行结构</span></div><div class="compare-line"><span><b>教皇</b><br>传统、制度、共同规范</span><span>✦</span><span>纳入体系或正式化</span></div><div class="compare-line"><span><b>正义</b><br>事实、证据、公平标准</span><span>✦</span><span>衡量并作判断</span></div></article>
+        <article class="compare-card"><h3>战车 vs 力量</h3><div class="compare-line"><span><b>战车</b><br>控制外部方向与阻碍</span><span>vs</span><span><b>力量</b><br>管理内部冲动与恐惧</span></div><div class="compare-line"><span>偏快、集中推进</span><span>vs</span><span>偏稳、耐心调节</span></div></article>
+        <article class="compare-card"><h3>月亮 vs 女祭司</h3><div class="compare-line"><span><b>月亮</b><br>信息混杂、难辨</span><span>vs</span><span><b>女祭司</b><br>信息未显、保留</span></div><div class="compare-line"><span>焦虑、投射、恐惧放大</span><span>vs</span><span>克制、安静、向内感知</span></div></article>
+        <article class="compare-card"><h3>死神 vs 高塔</h3><div class="compare-line"><span><b>死神</b><br>旧阶段实质结束</span><span>vs</span><span><b>高塔</b><br>结构遭突发冲击</span></div><div class="compare-line"><span>重点：结束什么</span><span>vs</span><span>重点：什么被打破</span></div></article>
+        <article class="compare-card"><h3>正义 vs 审判</h3><div class="compare-line"><span><b>正义</b><br>依据事实和规则判断</span><span>vs</span><span><b>审判</b><br>复盘历程后必须回应</span></div><div class="compare-line"><span>正义在衡量</span><span>vs</span><span>审判在醒来</span></div></article>
+      </div>
+    </section>
+
+    <section id="practice" class="section shell">
+      <div class="quiz">
+        <div class="kicker" style="color:#e7c981">Question bank · 36</div>
+        <h3 id="quizTitle">分级题库与错题练习</h3>
+        <div class="quiz-controls"><select id="quizLevel" class="quiz-select"><option value="all">全部难度</option><option value="基础">基础</option><option value="进阶">进阶</option><option value="高阶">高阶</option></select><select id="quizTopic" class="quiz-select"><option value="all">全部主题</option><option value="牌义">牌义</option><option value="组合">组合</option><option value="牌阵">牌阵</option><option value="边界">边界</option><option value="小牌">小牌</option></select><select id="quizMode" class="quiz-select"><option value="all">全部题目</option><option value="wrong">只练错题</option></select></div>
+        <p id="quizQuestion">点击“出题”。先独立回答，再查看参考答案并自评。</p>
+        <div class="quiz-actions"><button id="newQuiz" class="primary-btn" type="button">随机出题</button><button id="showAnswer" class="ghost-btn" type="button" disabled>查看参考答案</button></div>
+        <div id="quizAnswer"></div>
+        <div id="selfGrade" class="self-grade"><button class="ghost-btn" data-grade="correct" type="button">答对 / 掌握</button><button class="ghost-btn" data-grade="partial" type="button">部分答对</button><button class="ghost-btn" data-grade="wrong" type="button">加入错题</button></div>
+        <div id="quizStat" class="quiz-stat">已作答 0 题 · 错题 0 题</div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><strong>学习提示：</strong>先写核心动作，再进入语境；先建立组合关系，再写故事；读到牌能支持的位置就停。涉及健康、法律、财务或安全问题时，请回到现实证据与专业支持。</div></footer>
+
+  <dialog id="cardDialog" aria-labelledby="dialogTitle">
+    <div class="modal-head"><div><h2 id="dialogTitle"></h2><p id="dialogSubtitle"></p></div><button class="close" aria-label="关闭" type="button">×</button></div>
+    <div class="modal-body" id="dialogBody"></div>
+  </dialog>
+
+  <script>
+    const cards = [
+      {n:"0",cn:"愚人",en:"The Fool",cat:["action","change"],action:"走出去，开始体验",keys:["开放","自由","未知","试探","新阶段"],pit:"把它等同于幼稚、不负责或一定会离开；把自由直接具体化成“只想玩玩”。",rel:"更倾向轻松、开放、暂不过度定义；也可表示进入新阶段。不能据此断言不爱或不负责。",work:"尝试新方向、跨出舒适区、以探索方式启动；风险在于准备不足。",cmp:"魔术师强调“已有资源并主动实现”；愚人强调“先跨出去，答案在路上”。教皇强调规范，愚人强调开放。"},
+      {n:"I",cn:"魔术师",en:"The Magician",cat:["action"],action:"调动资源，把想法做出来",keys:["主动","能力","表达","启动","整合"],pit:"只读成聪明或会骗人；把“能做”误当成“必然成功”。",rel:"愿意主动创造互动、表达或推动局面；是否真诚要看问题与其他牌。",work:"资源、技能与行动条件较齐，可以开始执行、展示方案或促成合作。",cmp:"愚人是开始体验；魔术师是有意识地操作资源。战车是目标已定后的集中推进。"},
+      {n:"II",cn:"女祭司",en:"The High Priestess",cat:["inner","clarity"],action:"收住表达，观察内在信息",keys:["沉默","直觉","保留","观察","未显信息"],pit:"等同于第三者、秘密恋情或什么都不做；把“不说”读成“没有感受”。",rel:"存在未表达的感受或判断，目前倾向观察与保留；信息不足时不宜贸然质问。",work:"先研究、听取隐性信号、保护机密；暂缓公开结论或行动。",cmp:"隐士是主动抽离以独立思考；倒吊人是推进受阻而悬置；月亮是信息混杂、难辨真伪。"},
+      {n:"III",cn:"皇后",en:"The Empress",cat:["inner","structure"],action:"滋养并促成生长",keys:["丰盛","吸引","照料","创造","生长"],pit:"机械等同怀孕、母亲或老婆；只读成外貌漂亮。",rel:"感到温暖、吸引、接纳或情绪滋养；可表示关系有生长空间，但不保证婚姻。",work:"培育创意、产品或团队，让资源形成可持续产出；重视体验与环境。",cmp:"女祭司收敛而内隐；皇后外显地滋养与生长。皇帝建结构，皇后育生命。"},
+      {n:"IV",cn:"皇帝",en:"The Emperor",cat:["structure","action"],action:"建立结构并维持秩序",keys:["规则","边界","责任","稳定","管理"],pit:"直接等同男性长辈、丈夫或强势控制狂；把稳定误读为永久。",rel:"重视明确位置、边界和责任，也可能希望掌控节奏；是否温柔或长期需额外证据。",work:"制定规则、分工与决策链，稳定局面并承担管理责任。",cmp:"教皇依据群体规范和传统；正义依据事实与公平判断；皇帝直接建立并执行结构。"},
+      {n:"V",cn:"教皇",en:"The Hierophant",cat:["structure"],action:"把个体纳入共同规范",keys:["传统","制度","承诺","指导","正式化"],pit:"一出现就断言结婚；等同道德正确或宗教人物。",rel:"可能讨论正式身份、共同价值或可被认可的关系结构；婚姻只是可能形式之一。",work:"遵循制度、接受导师指导、进入专业体系，或用标准流程解决问题。",cmp:"皇帝制定秩序；教皇传承规范；正义审查事实与责任。"},
+      {n:"VI",cn:"恋人",en:"The Lovers",cat:["action","inner"],action:"在连接中作出价值选择",keys:["吸引","连接","选择","一致性","关系意义"],pit:"抽到就说“他爱我”或“一定在一起”；把选择机械读成犹豫不决。",rel:"存在吸引、连接或重要选择议题；能否落实关系要看行动牌与现实条件。",work:"在重要路径、伙伴或价值取向之间作选择，并承担选择后果。",cmp:"圣杯二更偏双方情感交换；恋人更强调价值一致与重要选择。战车是选定后推进。"},
+      {n:"VII",cn:"战车",en:"The Chariot",cat:["action"],action:"锁定方向，排除阻力推进",keys:["目标","意志","行动","掌控","速度"],pit:"把主动推进直接读成向你告白或必胜；忽略强推、失衡风险。",rel:"可能主动处理、拉近或明确关系方向；推进到哪里仍由问题、位置和其他牌决定。",work:"目标明确，集中资源突破阻碍；适合冲刺、竞争与项目推进。",cmp:"魔术师启动与促成；战车沿既定目标推进。力量驾驭内部冲动，战车控制外部方向。"},
+      {n:"VIII",cn:"力量",en:"Strength",cat:["inner","action"],action:"用内在稳定驾驭本能",keys:["克制","勇气","耐心","温柔坚定","自我调节"],pit:"把力量读成强硬压制或果断行动；据此预测一定会表白。",rel:"有意识控制情绪、欲望或冲动，以耐心而坚定的方式处理；也可能继续克制表达。",work:"在压力中稳定情绪，凭耐力、影响力而非蛮力处理困难。",cmp:"战车解决外部阻力；力量管理内部反应。节制协调不同要素，力量首先稳住自己。"},
+      {n:"IX",cn:"隐士",en:"The Hermit",cat:["inner"],action:"抽离噪声，独自求证",keys:["内省","距离","独立思考","谨慎","寻找答案"],pit:"等同分手、孤独终老或冷暴力；把拉开距离当作退出关系。",rel:"减少互动，把注意力收回自身，独自确认真实态度；不保证最终靠近或离开。",work:"暂缓社交与扩张，独立研究、复盘，寻求专业而深度的判断。",cmp:"女祭司是不表达；隐士是要自己想清楚；倒吊人是原方式推不动。"},
+      {n:"X",cn:"命运之轮",en:"Wheel of Fortune",cat:["change"],action:"让周期与外部变量改变局面",keys:["转折","周期","时机","外部推动","变化"],pit:"说成命中注定、好运必来或宇宙安排；虚构具体外部事件。",rel:"互动节奏或关系阶段受时机、环境推动而改变；变化方向需由相邻牌判断。",work:"市场、组织或时机改变原有状态，应识别窗口并保留适应性。",cmp:"死神强调旧阶段结束；高塔强调结构突遭打破；命运之轮强调周期转动与外因。"},
+      {n:"XI",cn:"正义",en:"Justice",cat:["structure","clarity"],action:"依据事实衡量并作判断",keys:["事实","公平","责任","因果","决定"],pit:"读成报应、法律诉讼或一定有结果；把冷静判断等同无感情。",rel:"基于已发生的事实评估公平、责任与边界，倾向作理性处理。",work:"审查证据、合同、绩效或责任分配，按一致标准作决定。",cmp:"皇帝建立规则；教皇遵循制度；正义检验事实是否公平合理。审判是复盘后必须回应。"},
+      {n:"XII",cn:"倒吊人",en:"The Hanged Man",cat:["inner","change"],action:"停止硬推，换角度看",keys:["悬置","等待","停滞","让渡控制","重新理解"],pit:"等同失败、放弃或对方主动想暂停；把客观状态读成主观意图。",rel:"暂时难以按原方式推进，需要停下来重新理解；无法单独推出他已放弃。",work:"方案卡住，暂不宜强推；通过换视角、调整投入或接受延迟寻找突破。",cmp:"女祭司选择保留表达；隐士主动抽离思考；倒吊人是进程悬置且需转换视角。"},
+      {n:"XIII",cn:"死神",en:"Death",cat:["change"],action:"结束旧状态，腾出新空间",keys:["结束","切换","脱离","不可逆转变","阶段更替"],pit:"预测现实死亡；机械等同分手、失业或坏结局。",rel:"原有关系形态走到尽头，需要结束旧模式；可能分开，也可能重新定义。",work:"旧方案、岗位或业务阶段结束，需转入全新结构；新阶段好坏尚未确定。",cmp:"高塔是突然打破结构；死神是旧阶段实质结束。命运之轮是周期变化，不必然终结。"},
+      {n:"XIV",cn:"节制",en:"Temperance",cat:["change","structure"],action:"调和差异，逐步形成平衡",keys:["协调","融合","修复","适度","渐进"],pit:"读成无条件和好或什么都不做；忽视双方调整与时间成本。",rel:"降低对抗，协调需求与边界，逐步形成双方可接受的相处方式；不保证复合。",work:"整合团队、资源或方法，控制节奏，让系统稳定运行。",cmp:"力量先管理自身冲动；节制在不同要素之间调配。正义判断是否公平，节制寻找可运行的中间态。"},
+      {n:"XV",cn:"恶魔",en:"The Devil",cat:["inner","change"],action:"揭示难以抽离的绑定",keys:["欲望","依赖","执念","控制","重复模式"],pit:"等同坏人、出轨、性关系或“有毒关系”；对人物作道德定性。",rel:"可能有强吸引、依赖或控制性绑定，明知不适仍难抽离；具体成因需额外证据。",work:"被利益、绩效、权力或习惯绑定；短期回报可能强化不健康循环。",cmp:"恋人强调自由选择与一致；恶魔强调选择受欲望/恐惧束缚。倒吊人是卡住，恶魔是被绑住。"},
+      {n:"XVI",cn:"高塔",en:"The Tower",cat:["change","clarity"],action:"突然击穿原有结构",keys:["冲击","崩塌","突变","认知破裂","失稳"],pit:"一律读成灾难、真相曝光或分手；虚构事故、背叛等具体事件。",rel:"突发冲击打破原有相处结构，关系无法维持原样；是否结束要看后续牌。",work:"突发事件、结构性故障或认知被推翻，需要先处理失稳，再重建。",cmp:"死神是旧阶段结束；高塔是结构突遭破坏。月亮是不清楚，高塔是现实强行显现或冲击。"},
+      {n:"XVII",cn:"星星",en:"The Star",cat:["clarity","change"],action:"在冲击后恢复希望与方向",keys:["疗愈","信任","希望","清澈","恢复"],pit:"等同愿望必实现、复合成功或立即行动；忽略其行动强度较弱。",rel:"修复信任与安全感，重新看见未来可能；不必然表示和好或马上恢复关系。",work:"在挫折后重建信心与长期方向，适合愿景校准、恢复与持续投入。",cmp:"太阳是当下清晰与显现；星星是恢复中的希望和远景。节制侧重具体协调，星星侧重信念修复。"},
+      {n:"XVIII",cn:"月亮",en:"The Moon",cat:["clarity","inner"],action:"暴露信息不足与情绪放大",keys:["迷茫","暧昧","不确定","潜意识","误判风险"],pit:"断言欺骗、第三者或阴谋；把直觉当成已经核实的事实。",rel:"感觉不对但证据不足，情绪、恐惧与直觉混杂；适合补充信息而非下定论。",work:"目标或信息不清，团队可能受传言、焦虑影响；先核查假设与数据。",cmp:"女祭司是安静地保留或感知；月亮是信息混杂而难辨。太阳使情况清楚，月亮使判断摇摆。"},
+      {n:"XIX",cn:"太阳",en:"The Sun",cat:["clarity","action"],action:"让事物清晰显现",keys:["清楚","公开","活力","坦诚","被看见"],pit:"等同百分百成功、结婚生子或毫无问题；忽略题目与位置限制。",rel:"互动更公开、直接、轻松，彼此更容易看清；不机械等于一定在一起。",work:"成果显现、沟通透明、能量提升或获得认可；仍需落实执行细节。",cmp:"星星是恢复希望；太阳是当下显现。审判是在看清或回顾后作出回应。"},
+      {n:"XX",cn:"审判",en:"Judgement",cat:["clarity","change","structure"],action:"回顾过去并作出重要回应",keys:["觉醒","复盘","召唤","重新评估","回应"],pit:"等同报应、被惩罚、复合或旧人必回头；把“过去重现”直接写成具体人物。",rel:"过去问题重新出现并要求处理，不能再拖延，需要重新评估并回应。",work:"复盘长期结果，回应职责或使命，作关键去留决定；强调从经验中醒悟。",cmp:"正义依据事实与规则作判断；审判在回顾整体历程后意识到必须回应。太阳是看清，审判是醒来并回应。"}
+    ];
+
+    const worldCard = {n:"XXI",cn:"世界",en:"The World",cat:["clarity","change","structure"],action:"整合成果，完成一个周期",keys:["完成","整合","闭环","成熟","进入下一周期"],pit:"把完成机械理解成关系必成、考试必过；忽略完成也可能意味着正式结束。",rel:"关系或个人课题来到可总结、整合或定型的节点；是圆满结合还是完整告别，需要问题和现实证据区分。",work:"项目交付、阶段收官、能力整合或进入更大系统；重点是闭环与迁移。",cmp:"审判是复盘后回应；世界是回应完成并形成闭环。死神结束旧态，世界整合整个历程。"};
+    cards.push(worldCard);
+    const fullMajor = [...cards];
+
+    const suitMeta = {
+      Wands:{cn:"权杖",element:"火",domain:"行动、欲望、创造与驱动力",verb:"启动、争取或扩张"},
+      Cups:{cn:"圣杯",element:"水",domain:"情感、关系、想象与接纳",verb:"感受、连接或交换"},
+      Swords:{cn:"宝剑",element:"风",domain:"思维、沟通、判断与冲突",verb:"分析、表达或切割"},
+      Pents:{cn:"星币",element:"土",domain:"资源、身体、工作与现实成果",verb:"落实、积累或维护"}
+    };
+    const rankMeta = [
+      {en:"Ace",cn:"王牌",structure:"种子与潜能开始进入现实",num:1},
+      {en:"Two",cn:"二",structure:"出现二元、配对、选择或平衡",num:2},
+      {en:"Three",cn:"三",structure:"生长、合作并形成初步成果",num:3},
+      {en:"Four",cn:"四",structure:"建立稳定结构，也可能趋于僵化",num:4},
+      {en:"Five",cn:"五",structure:"稳定被扰动，出现摩擦、缺口或挑战",num:5},
+      {en:"Six",cn:"六",structure:"在扰动后调整、恢复、交换或前进",num:6},
+      {en:"Seven",cn:"七",structure:"进入检验、策略、评估或坚持",num:7},
+      {en:"Eight",cn:"八",structure:"组织力量、持续推进或熟练运作",num:8},
+      {en:"Nine",cn:"九",structure:"经验累积至临界点，接近完成",num:9},
+      {en:"Ten",cn:"十",structure:"一个周期达到总量、完成或过载",num:10},
+      {en:"Page",cn:"侍从",structure:"以学习者姿态接触并试验该元素",num:11},
+      {en:"Knight",cn:"骑士",structure:"把该元素直接带向行动与追求",num:12},
+      {en:"Queen",cn:"王后",structure:"把该元素内化、承载并稳定表达",num:13},
+      {en:"King",cn:"国王",structure:"在外部环境中管理并负责运用该元素",num:14}
+    ];
+    const minorOverrides = {
+      "Wands:5":"多方意志相撞、竞争或磨合；冲突未必敌对，也可能是能力校准。",
+      "Wands:8":"力量快速汇聚并向目标移动；信息、进度或事件节奏加速。",
+      "Wands:10":"承担的任务或意志达到过载；完成在望但负担分配需调整。",
+      "Cups:2":"双方情感或价值发生交换与回应；支持连接，不自动证明长期承诺。",
+      "Cups:5":"注意力停留在失落与未如愿处；仍存在资源，但当事人暂未充分看见。",
+      "Cups:7":"情感与想象产生多种可能；需要区分愿望、投射与可执行选项。",
+      "Cups:8":"现有满足已不足以继续投入，于是主动离开以寻找更真实的意义。",
+      "Cups:10":"情感系统达到共享与归属的完整图景；它描述理想状态，不保证永久。",
+      "Swords:2":"通过暂缓选择维持平衡；信息或意愿未充分进入决定。",
+      "Swords:3":"痛苦的信息或分离进入意识；描述受伤，不自动说明第三者。",
+      "Swords:7":"以迂回、独立或策略性方式行动；可能规避公开对抗，但不能直接定性欺骗。",
+      "Swords:8":"认知框架和恐惧限制行动感；现实限制与自我限制需要分开核实。",
+      "Swords:10":"某种认知、沟通或冲突模式到达极限；最坏点已显现，但后续仍需处理。",
+      "Pents:3":"技能、分工与反馈在实际项目中协作；成果取决于标准和执行。",
+      "Pents:5":"资源、安全感或归属出现缺口；也可能因羞耻或孤立而看不见帮助。",
+      "Pents:7":"投入后进入评估期；比较成本、进度和继续投入的价值。",
+      "Pents:8":"通过重复练习提升技能；强调过程质量、纪律与可积累成果。",
+      "Pents:10":"物质与制度资源形成长期系统；涉及传承、组织或稳定网络。"
+    };
+    const minorCards = Object.entries(suitMeta).flatMap(([suit,sm]) => rankMeta.map((rank,idx) => ({
+      id:`${suit}:${rank.num}`, type:"minor", suit, rank:rank.num, cn:`${sm.cn}${rank.cn}`, en:`${rank.en} of ${suit === 'Pents' ? 'Pentacles' : suit}`,
+      element:sm.element, domain:sm.domain, structure:rank.structure,
+      action:minorOverrides[`${suit}:${rank.num}`] || `${sm.domain}领域中，${rank.structure}；可理解为${sm.verb}的具体阶段。`,
+      image:`https://commons.wikimedia.org/wiki/Special:Redirect/file/${suit}${String(idx+1).padStart(2,'0')}.jpg`
+    })));
+    const deck78 = [
+      ...fullMajor.map((c,idx)=>({...c,id:`major:${idx}`,type:"major",element:"大阿尔卡那",domain:"人生主题与阶段",structure:c.action})),
+      ...minorCards
+    ];
+
+    const spreads = [
+      {id:"one",name:"单牌显微镜",level:"基础",positions:["核心机制"],theory:"同一张牌依问题位置改变语法。训练时先写核心动作，再分别尝试把它翻译成原因、建议和趋势。"},
+      {id:"mechanism",name:"三张机制牌阵",level:"基础",positions:["当前驱动力","关键阻碍","可行行动"],theory:"用机制与行动替代宿命式过去—现在—未来，适合大多数关系、学习和工作问题。"},
+      {id:"evidence",name:"证据校准牌阵",level:"进阶",positions:["已经观察到的事实","我的解释或投射","仍需核实的信息","更稳妥的下一步"],theory:"专门用于“我感觉不对但证据不足”的问题。事实位也只是象征提示，最终仍需现实核查。"},
+      {id:"choice",name:"双路径决策",level:"进阶",positions:["真正需求","路径A的动力","路径A的代价","路径B的动力","路径B的代价"],theory:"牌阵比较的是机制、成本和匹配度，不替你决定，也不声称预知两条路径的固定结局。"},
+      {id:"relationship",name:"关系动力图",level:"进阶",positions:["我的状态","对方在互动中的表现","共同动力","主要张力","可调整边界"],theory:"读取可观察的互动角色和关系机制，避免把对方位置当成能准确读取其隐私思想。"},
+      {id:"celtic",name:"凯尔特十字学习版",level:"高阶",positions:["核心现状","交叉阻力","意识目标","深层基础","近期背景","近期发展","自我位置","环境影响","希望与担忧","综合趋向"],theory:"经典十张结构适合复杂议题。先按纵轴与横轴成组阅读，再综合人物、元素与大牌密度；不应逐张拼成长篇剧情。"}
+    ];
+
+    const advanced = {
+      "0":{symbols:["悬崖：未知边界与风险，不等于必然坠落","小狗：本能、陪伴或现实提醒","轻装与远山：经验尚未定型，方向仍开放"],combo:"与魔术师组合时，可读作“开放探索 → 有意识启动”；与教皇形成“自由体验 ↔ 规范定义”的张力。",high:"至少保留两种解释：勇于开始，或准备不足。区分二者要看现实资源、风险意识与相邻牌。",test:"当事人是否已经做过最低限度的准备？若准备充分，“鲁莽”解释应降低权重。"},
+      "I":{symbols:["桌面四器具：资源维度齐全，但是否熟练仍需验证","上指下指：把抽象意图导入现实","无限符号：持续专注与潜能"],combo:"与星币牌相邻更偏资源落地；与宝剑七、月亮相邻时，表达与操控信息的风险上升，但仍不能直接断言欺骗。",high:"区分“具备促成能力”和“正在有效执行”。魔术师提高能动性假设，不单独保证结果。",test:"是否存在可观察的行动、资源调用或清楚表达？若只有口头意向，执行性结论应下调。"},
+      "II":{symbols:["黑白柱：二元张力与未被整合的信息","帷幕：信息被遮蔽或有意保留","卷轴与月相：知识并非全部公开"],combo:"与隐士加强向内与封闭；与月亮会增加信息不确定性；与力量组合常见“有内容但克制表达”。",high:"竞争解释包括：已经知道但不说，或仍在感知尚未成形。不要把“保留”自动写成“隐瞒恶意”。",test:"后续是否出现稳定、可复述的判断？若持续没有明确内在立场，“已经知道答案”的解释应降低。"},
+      "III":{symbols:["麦田与森林：资源、身体性与生长环境","金星符号：吸引、价值与关系性","丰盛衣袍：承载与孕育，不限于生育"],combo:"与皇帝构成“滋养—结构”的互补；与星币加强现实培育；与恶魔相邻需检查滋养是否转为过度依赖。",high:"区分“给予滋养”与“过度照料”。要看交换是否对等、边界是否清楚、成长是否真实发生。",test:"被照料者是否更有自主性和能力？若越来越依赖，健康滋养的解释需要修正。"},
+      "IV":{symbols:["石座：稳定、刚性与耐久","铠甲：防御与责任准备","山地：秩序建立在克服现实阻力之上"],combo:"与教皇加强制度化；与战车形成“先建结构，再推进”；与愚人则呈现控制与开放的张力。",high:"皇帝可表示安全结构，也可表示控制过度。判断关键是规则是否透明、可协商、对各方一致。",test:"规则是否同样约束掌权者？若只约束别人，“责任秩序”解释应转向“权力控制”。"},
+      "V":{symbols:["宗教/制度空间：个体进入公共规范","双钥匙：知识或资格的授权","两位听众：传承、教学与共同认同"],combo:"与恋人可指价值选择是否进入正式结构；与正义加强规则审查；与愚人形成自由与规范的张力。",high:"区分“有益的共同标准”和“未经检验的从众”。制度的存在不是正当性的充分证据。",test:"规范能否解释其目的，并允许基于事实修订？若不可质疑，从众风险权重上升。"},
+      "VI":{symbols:["裸露人物：关系中的真实与脆弱","天使与山：连接包含超越个人欲望的价值层","树木意象：选择同时带来后果"],combo:"与战车常读作“选择 → 推进”；与教皇可能涉及正式承诺；与女祭司则是连接存在但表达保留。",high:"将“吸引”“价值一致”“需要选择”拆开评估。三者可能同时出现，也可能只有其中一项。",test:"双方是否在关键价值和行动上保持一致？若只有吸引而无一致行动，“关系落实”置信度应降低。"},
+      "VII":{symbols:["黑白兽：相反力量需要被统一指挥","城墙离开：从稳定区进入行动","无明显缰绳：控制主要依赖意志与方向"],combo:"与力量形成外控—内控；与皇帝形成结构—执行；与月亮相邻时，要警惕目标看似明确但信息不足。",high:"推进本身不是成功指标。评估目标是否清楚、阻力是否真实、代价是否可接受。",test:"行动是否持续朝同一目标产生可测进展？若只是频繁动作，不能称为有效推进。"},
+      "VIII":{symbols:["温柔触碰狮子：调节本能而非消灭本能","无限符号：持续而稳定的内在资源","白衣与花环：坚定可与温和共存"],combo:"与女祭司加强克制；与战车形成内外双重控制；与恶魔相邻时，可读为对欲望/依赖的管理。",high:"克制可能是成熟调节，也可能是压抑。区分标准是情绪是否被承认、表达是否有安全出口。",test:"克制后是否产生更清楚、可持续的行动？若只是长期僵住或反复爆发，成熟调节解释应降低。"},
+      "IX":{symbols:["灯笼：只照亮下一小段，而非掌握全部答案","高处独行：距离带来视角，也带来隔离","手杖：依靠经验支撑探索"],combo:"与女祭司加强封闭和内在；与命运之轮可指变化后退回反思；与太阳相邻可能是独处后获得清晰。",high:"区分有目的的独处与回避互动。关键不在距离本身，而在距离是否产生判断与回归条件。",test:"独处是否带来更清楚的结论或可沟通的需求？若没有，回避解释权重上升。"},
+      "X":{symbols:["转轮：位置与条件持续变化","四角形象：变化中仍有观察或稳定原则","上升下降人物：同一变化对各方影响不同"],combo:"后牌常决定转折方向；与隐士可读为外部变化促成内省；与死神则可能从周期变化走向阶段结束。",high:"不要把外部变量人格化为“命运安排”。应列出可观察变量：时机、组织、市场、关系阶段。",test:"如果外部条件不变，局面是否仍会转折？若会，内部因素的权重应提高。"},
+      "XI":{symbols:["天平：比较证据与影响","直剑：清楚划分并承担结论","正面坐姿：标准应一致、过程应可说明"],combo:"与皇帝是规则建立与审查；与审判是局部证据判断与整体历程回应；与死神可指判断后结束旧状态。",high:"高阶解读需写明判断标准，避免把个人偏好伪装成公平。事实、规则和后果三者应分别陈述。",test:"同一标准应用于角色互换后，结论是否仍成立？若不成立，公平性假设需修正。"},
+      "XII":{symbols:["倒置视角：世界未必改变，解释框架先改变","头部光环：悬置可能带来认知收获","一腿放松：并非纯粹挣扎，也可能主动让渡控制"],combo:"与节制常见“先别硬推 → 慢慢调整”；与死神是悬置后旧模式结束；与恶魔是既被绑定又卡住。",high:"区分策略性暂停、客观受阻与习得性无助。牌面说明悬置机制，但主动性要由现实证据判定。",test:"当外部阻碍解除时，行动是否恢复？若仍不动，原因可能不只是客观悬置。"},
+      "XIII":{symbols:["骷髅骑士：变化触及结构核心而非表面修补","黑旗白花：结束与新生并存","不同人物：转变不因身份而豁免"],combo:"与高塔是冲击后实质结束；与节制可能是结束旧态后重组；与太阳可指转变后的状态更清楚。",high:"结束对象必须具体化为“旧模式/阶段/角色”，但不能擅自具体化为现实死亡或必然分手。",test:"哪些旧规则或行为已经不可恢复？若核心结构仍原样运行，“根本结束”的置信度应下降。"},
+      "XIV":{symbols:["两杯倒水：持续调配而非一次解决","一脚水一脚地：在情感与现实之间校准","远方道路：平衡是过程，不是静止终点"],combo:"与力量是自我调节再协调双方；与星星加强修复；与倒吊人提示放慢并更换方法。",high:"中间方案不一定公平。高阶评估要看双方成本、权力差异和方案可持续性。",test:"调整是否让双方的关键需求都更可满足？若只有一方不断让步，平衡解释需要修正。"},
+      "XV":{symbols:["松链：束缚可能部分由习惯、恐惧或选择维持","倒置五芒星：价值次序被欲望/利益压倒","火与尾巴：本能驱动被放大"],combo:"与倒吊人是被绑住且卡住；与力量可指管理欲望；与恋人形成受束缚选择与自由价值选择的对照。",high:"不要将绑定道德化。列出可能机制：即时奖赏、依赖、权力差、恐惧、沉没成本，并寻找现实证据。",test:"如果撤除即时奖赏或惩罚，关系/行为是否仍维持？答案有助判断具体绑定机制。"},
+      "XVI":{symbols:["闪电：外部或突发信息击穿结构","坠落皇冠：原有权威/认知失效","人物坠落：失稳先于新秩序建立"],combo:"与死神常见冲击促成旧态结束；与星星是破裂后的恢复；与正义可指冲击后回到事实审查。",high:"将“冲击事件”和“被打破的结构”分开写。真相暴露只是可能事件之一，不是高塔的必要条件。",test:"若没有某个突发事件，原结构是否仍能维持？若本就不可持续，高塔可能只是触发点而非根因。"},
+      "XVII":{symbols:["裸露与倒水：恢复中的坦诚、流动与重新投入","大星与小星：长期方向与局部指引","鸟与树：脆弱环境中重新出现生命迹象"],combo:"与高塔是冲击后的修复；与节制加强渐进疗愈；与太阳可能从希望走向清晰显现。",high:"希望不是结果证据。应区分心理恢复、关系修复意愿与实际修复行为三层。",test:"是否出现持续的小行动来支持希望？若没有，结果置信度应保持低位。"},
+      "XVIII":{symbols:["月光：间接照明，轮廓可见但细节失真","犬与狼：熟悉反应与本能反应并存","水中生物与道路：潜意识内容进入意识，路径仍不清"],combo:"与女祭司加强未显信息，但月亮更混杂；与太阳形成迷—明转换；与宝剑牌相邻可能放大焦虑与解释冲突。",high:"把事实、感受、推测分栏书写。直觉可以提出假设，但必须由可观察证据检验。",test:"哪些独立事实能同时支持或反驳当前担忧？若只有感受重复，事实结论不得升级。"},
+      "XIX":{symbols:["直射太阳：信息公开、可见度提高","孩子：生命力、直接性与较少防御","向日葵与墙：成长在清楚边界内显现"],combo:"与月亮可读为由不清走向清楚；与星星是希望到显现；与审判可能是看清后回应。",high:"清晰不等于所有结果都积极。它也可能使不合适之处变得无法忽视。将“看清”和“喜欢看到的答案”分开。",test:"信息是否可被双方独立复述与核实？若只是情绪变好，清晰度结论应降低。"},
+      "XX":{symbols:["号角：过去问题发出无法忽略的召唤","人物起身：从旧状态中回应与苏醒","开放棺木：旧经验被重新解释，不等于简单回到过去"],combo:"与正义是证据判断后作重大回应；与太阳是看清后醒来；与死神可能是复盘后完成阶段转换。",high:"审判的重点是回应责任/召唤，不保证回应方向。可列出继续、结束、修复等竞争性选项及其证据。",test:"什么长期模式或结果已无法继续忽视？若没有明确累积证据，“重大回应”的强度应降低。"}
+    };
+    advanced["XXI"]={symbols:["中央人物：对立经验被整合为更完整的自我","花环：周期形成边界与闭环","四角形象：多个层面进入相对稳定的整体"],combo:"与审判是回应之后完成闭环；与愚人可形成完成—再出发的大周期；与死神是结束旧态后完成整合。",high:"完成不等于所有问题永久消失。要说明完成的是任务、身份、关系形态还是学习周期，以及新周期已产生哪些条件。",test:"有哪些可核实的交付、总结或能力迁移证明周期确实完成？若只有主观满足，外部闭环的置信度应降低。"};
+
+    const sprite = {
+      "0":[336,1],"I":[0,208],"II":[111,208],"III":[222,208],"IV":[333,208],"V":[444,208],"VI":[555,208],"VII":[660,208],
+      "VIII":[0,401],"IX":[111,401],"X":[222,401],"XI":[333,401],"XII":[444,401],"XIII":[555,401],"XIV":[660,401],
+      "XV":[0,595],"XVI":[111,595],"XVII":[222,595],"XVIII":[333,595],"XIX":[444,595],"XX":[555,595]
+    };
+
+    const quizzes = [
+      {id:1,l:"基础",t:"牌义",q:"女祭司的核心动作是什么？它与‘什么都没有’有什么区别？",a:"核心是收住表达、观察内在信息。未表达不等于没有内容，也不能直接推出秘密恋情。",s:"动作准确｜误区纠正｜边界"},
+      {id:2,l:"基础",t:"牌义",q:"战车与力量都涉及控制，它们控制的对象分别是什么？",a:"战车主要组织外部方向与阻力；力量主要调节内部冲动、恐惧和本能。",s:"控制对象｜速度差异｜语境"},
+      {id:3,l:"基础",t:"牌义",q:"死神与高塔的变化机制有什么区别？",a:"死神强调旧状态实质结束；高塔强调原结构遭受突发冲击或失效。两者都不能机械等同现实灾祸。",s:"结束对象｜触发方式｜边界"},
+      {id:4,l:"基础",t:"牌义",q:"正义和审判都可能指决定，二者依据有什么不同？",a:"正义依据当前事实、规则和责任衡量；审判在回顾较长历程后意识到必须回应。",s:"时间范围｜判断机制｜动作"},
+      {id:5,l:"基础",t:"牌义",q:"月亮为什么不能直接等同于欺骗？",a:"月亮明确支持的是信息不清、情绪与直觉混杂。欺骗只是需要额外现实证据才能成立的解释之一。",s:"明确信息｜备选解释｜现实核实"},
+      {id:6,l:"基础",t:"牌义",q:"皇帝、教皇、正义各自如何处理规则？",a:"皇帝建立并执行结构；教皇传承共同规范、使个体进入体系；正义依据规则和事实审查与裁决。",s:"建立｜传承｜审查"},
+      {id:7,l:"基础",t:"小牌",q:"用‘元素×数字’解释权杖五，不依赖死记关键词。",a:"权杖/火定位行动与意志；五带来扰动与摩擦，因此可读为多股意志竞争、磨合或争夺空间。",s:"元素｜数字｜合成句"},
+      {id:8,l:"基础",t:"小牌",q:"圣杯七的‘七’如何改变水元素？",a:"七带来检验、评估与策略；水元素中的多种感受和想象需要筛选，所以要区分愿望、投射与可执行选项。",s:"七的结构｜水的领域｜风险"},
+      {id:9,l:"基础",t:"小牌",q:"侍从、骑士、王后、国王不作为具体人物时，分别可表示什么？",a:"分别表示学习试验、带向行动、内化承载、外部管理该元素的方式或成熟度。",s:"四位阶｜行为风格｜非性别化"},
+      {id:10,l:"基础",t:"边界",q:"抽到恋人，能否回答‘他一定爱我并会和我在一起’？",a:"不能。恋人支持连接、吸引或价值选择；爱意强度、行动和结果需要其他牌与现实行为支持。",s:"支持｜不足｜现实证据"},
+      {id:11,l:"基础",t:"牌阵",q:"为什么抽牌前要先写清每个位置？",a:"位置为牌规定句法，避免看到牌后临时改题和拼故事；也使不同牌的信息能够被比较和检验。",s:"位置功能｜防偏差｜可比较"},
+      {id:12,l:"基础",t:"组合",q:"女祭司 + 力量回答‘为什么没有表达’，最稳妥的组合句是什么？",a:"可能存在未表达的感受或判断，并被有意识地克制。不能确定克制原因、未来是否表达及最终选择。",s:"未表达｜克制｜边界"},
+      {id:13,l:"进阶",t:"组合",q:"高塔 → 星星最常见的组合语法是什么？请避免写具体事件。",a:"突发冲击或结构失效之后，进入恢复信任、方向与生命力的过程。星星描述修复倾向，不保证问题已经解决。",s:"递进｜修复｜不保证"},
+      {id:14,l:"进阶",t:"组合",q:"倒吊人 → 死神可如何形成递进？",a:"原方式无法继续推进而悬置，最终促使旧模式或旧阶段实质结束。仍需说明结束的是何种结构。",s:"悬置｜终止｜具体化对象"},
+      {id:15,l:"进阶",t:"组合",q:"皇帝 + 战车用于团队建议时，两张牌如何分工？",a:"皇帝先建立规则、分工和责任；战车再锁定方向、集中资源推进。风险是结构过硬或强推。",s:"先后顺序｜功能分工｜风险"},
+      {id:16,l:"进阶",t:"组合",q:"月亮 → 太阳是否必然表示‘谎言被揭穿’？",a:"不必然。明确支持的是由模糊、混杂走向可见和清晰；谎言只是需要额外证据的具体情节。",s:"变化轴｜合理推测｜越界"},
+      {id:17,l:"进阶",t:"组合",q:"恶魔 + 倒吊人如何区分‘被束缚’和‘暂时等待’？",a:"恶魔提示依赖、欲望、恐惧或利益绑定；倒吊人提示原方法推不动、需悬置换角度。组合可形成既被绑定又卡住的机制。",s:"绑定机制｜停滞机制｜组合"},
+      {id:18,l:"进阶",t:"小牌",q:"宝剑八和宝剑二都可能不行动，差异在哪里？",a:"宝剑二以暂不选择维持平衡；宝剑八更强调认知与恐惧造成的受限感。现实限制均需另行核实。",s:"决策暂停｜受限感｜现实限制"},
+      {id:19,l:"进阶",t:"小牌",q:"星币七与星币八相邻时，组合主线可能是什么？",a:"先评估已有投入、回报与方向，再通过持续练习和改进工艺推进；也可能提示别用忙碌回避策略复盘。",s:"评估｜练习｜替代解释"},
+      {id:20,l:"进阶",t:"小牌",q:"圣杯五 + 星星如何避免过度积极化？",a:"承认当前失落和注意偏向，再看到恢复希望与支持的可能。星星不抹去损失，也不证明愿望必然实现。",s:"承认损失｜恢复｜非保证"},
+      {id:21,l:"进阶",t:"牌阵",q:"设计一个三张牌阵来回答‘如何改善合作’，并说明三个位置为何不重复。",a:"可设：当前合作机制／主要摩擦／可执行调整。三位分别描述现状、障碍和行动，功能互补且直接服务问题。",s:"位置明确｜不重复｜可行动"},
+      {id:22,l:"进阶",t:"牌阵",q:"关系牌阵中的‘对方位置’应怎样表述，才不会越界读心？",a:"改写为‘对方在互动中的可观察表现或承担的角色’，并把内心动机标为待核实推测。",s:"可观察表现｜角色｜待核实"},
+      {id:23,l:"进阶",t:"边界",q:"牌阵中三张大牌是否证明事件一定重大？",a:"大牌密度可支持议题涉及较强的阶段性或主题性，但重大程度仍取决于问题范围、位置与现实影响。",s:"密度信号｜问题尺度｜现实影响"},
+      {id:24,l:"进阶",t:"边界",q:"逆位牌可以用哪四种机制理解？",a:"能量受阻、表现过量、转向内在、需要修正或重新协商。选哪种机制必须结合牌位、相邻牌与事实。",s:"四机制｜不机械反义｜证据"},
+      {id:25,l:"高阶",t:"组合",q:"同一组牌‘隐士 + 正义’提出两种竞争性解释，并写出各自所需证据。",a:"A：先独立调查再作公平判断，需要检索、记录或审查证据；B：因过度谨慎而把关系处理得疏离理性，需要观察回避互动与反复权衡。",s:"解释A｜解释B｜各自证据"},
+      {id:26,l:"高阶",t:"组合",q:"命运之轮 + 死神：如何判断是外部变化导致结束，还是结束恰逢环境变化？",a:"比较时间顺序、外部变量是否足以改变状态、核心结构在外因不存在时是否仍不可持续。牌只能提出模型，现实时间线负责检验。",s:"时间顺序｜反事实｜核实"},
+      {id:27,l:"高阶",t:"牌阵",q:"凯尔特十字为何不适合把十张牌逐张串成单线故事？",a:"位置属于不同层级与轴线，部分牌互为修正而非时间顺序。应先分组分析核心/交叉、意识/基础、时间轴、自我/环境等结构。",s:"位置层级｜轴线｜避免串故事"},
+      {id:28,l:"高阶",t:"牌阵",q:"如何判断一个五张牌阵是否存在位置冗余？",a:"尝试交换任意两位置：若答案几乎不受影响，或两个位置总产生相同句式，说明区分度不足，应合并或改写。",s:"交换测试｜区分度｜改写"},
+      {id:29,l:"高阶",t:"边界",q:"如何把‘他会不会回来’改写成更可行动、可检验的问题？",a:"例如：这段关系当前维持距离的主要机制是什么？我可观察哪些信号来判断是否值得重新接触？我能采取什么保护边界的行动？",s:"机制｜观察指标｜行动"},
+      {id:30,l:"高阶",t:"边界",q:"写出月亮牌的A/B/C三层结论。",a:"A：信息不清且情绪可能放大判断。B：可能存在沟通遗漏、误解或投射。C：对方一定撒谎/出轨——缺乏牌面与现实证据。",s:"明确支持｜合理推测｜越界"},
+      {id:31,l:"高阶",t:"小牌",q:"一组牌权杖很多但完全没有星币，可提出什么假设？如何避免元素决定论？",a:"可假设行动和热情高，而落实、资源或持续性较少被关注；随后必须检查现实计划、预算与执行，不能仅凭缺失元素断言失败。",s:"密度｜缺失｜现实校验"},
+      {id:32,l:"高阶",t:"小牌",q:"宫廷牌连续出现时，如何在‘多人’与‘同一人的多种角色’之间判断？",a:"看问题是否询问人物、牌位是否区分角色、元素与位阶能否由同一人承担，并用现实中的行为一致性校验。",s:"问题类型｜位置｜行为校验"},
+      {id:33,l:"高阶",t:"组合",q:"太阳 + 审判为什么不必然是好消息？",a:"太阳使事实清晰可见，审判要求对历程作出回应；清晰也可能让不合适之处无法回避，最终回应方向并未被规定。",s:"清晰｜回应｜方向未定"},
+      {id:34,l:"高阶",t:"边界",q:"一次解读后应记录哪些信息，才能真正复盘准确性？",a:"原问题与时间、牌阵位置、牌面观察、解释A/B、置信度、可核实预测、现实反馈和偏差类型。避免只记录‘准的部分’。",s:"前置记录｜可核实项｜反偏差"},
+      {id:35,l:"高阶",t:"牌阵",q:"何时应从十张牌阵降级成三张？",a:"当问题尚不清楚、当事人信息不足、焦虑驱动重复抽牌，或三张已足以回答机制/阻碍/行动时。复杂度不是深度本身。",s:"信息量｜焦虑识别｜最小充分"},
+      {id:36,l:"高阶",t:"边界",q:"如何评价一段听起来很完整、但没有边界句的解读？",a:"完整叙事可能只是连贯性错觉。检查每个具体人物、时间、事件和动机是否由牌位与现实事实支持，并补充替代解释与不可确定项。",s:"连贯性错觉｜逐项证据｜替代解释"}
+    ];
+
+    const grid = document.querySelector('#cardGrid');
+    const search = document.querySelector('#search');
+    const resultCount = document.querySelector('#resultCount');
+    const dialog = document.querySelector('#cardDialog');
+    const dialogTitle = document.querySelector('#dialogTitle');
+    const dialogSubtitle = document.querySelector('#dialogSubtitle');
+    const dialogBody = document.querySelector('#dialogBody');
+    const learned = new Set(JSON.parse(localStorage.getItem('tarot-learned') || '[]'));
+    let activeFilter = 'all';
+    let activeCard = null;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+    function matches(card) {
+      const q = search.value.trim().toLowerCase();
+      const hay = [card.n,card.cn,card.en,card.action,...card.keys,card.pit,card.rel,card.work,card.cmp].join(' ').toLowerCase();
+      const filterOk = activeFilter === 'all' || (activeFilter === 'learned' ? learned.has(card.n) : card.cat.includes(activeFilter));
+      return filterOk && (!q || hay.includes(q));
+    }
+    function spriteStyle(n) {
+      const xy = sprite[n] || [0,0];
+      return `--x:${xy[0]};--y:${xy[1]}`;
+    }
+    function majorImageUrl(card) {
+      const number = card.id.split(':')[1].padStart(2,'0');
+      const fileNames = ["Fool","Magician","High Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Wheel of Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World"];
+      return `https://commons.wikimedia.org/wiki/Special:Redirect/file/RWS Tarot ${number} ${fileNames[Number(number)]}.jpg`;
+    }
+    function cardArt(card,reversed=false) {
+      const rev = reversed ? ' reversed' : '';
+      if (card.type === 'major' && card.n !== 'XXI') return `<span class="tarot-img${rev}" style="${spriteStyle(card.n)}" role="img" aria-label="${escapeHtml(card.cn)}"></span>`;
+      const url = card.type === 'major' ? majorImageUrl(card) : card.image;
+      return `<img class="minor-art${rev}" src="${escapeHtml(url)}" alt="${escapeHtml(card.cn)}牌面" loading="lazy" referrerpolicy="no-referrer" />`;
+    }
+    function cardHint(card,reversed=false) {
+      const base = card.type === 'major' ? card.action : card.action;
+      const structure = card.type === 'major' ? `大牌主题：${card.domain}` : `${card.element}元素 × ${card.structure}`;
+      const reverse = reversed ? '逆位训练：检查能量受阻、过量、内化或需要修正中的哪一种有现实证据。' : '正位训练：先按核心机制直读，再由牌位改变动词。';
+      return {base,structure,reverse};
+    }
+    function renderSpreadCatalog() {
+      const catalog = document.querySelector('#spreadCatalog');
+      const select = document.querySelector('#spreadSelect');
+      catalog.innerHTML = spreads.map((s,i)=>`<button class="spread-option ${i===1?'active':''}" data-spread="${s.id}" type="button"><strong>${escapeHtml(s.name)} · ${s.positions.length}张</strong><small>${escapeHtml(s.level)}｜${escapeHtml(s.positions.join(' · '))}</small><span class="spread-preview" aria-hidden="true">${s.positions.map(()=>'<i></i>').join('')}</span></button>`).join('');
+      select.innerHTML = spreads.map(s=>`<option value="${s.id}" ${s.id==='mechanism'?'selected':''}>${escapeHtml(s.name)}（${s.positions.length}张）</option>`).join('');
+      catalog.querySelectorAll('[data-spread]').forEach(btn=>btn.addEventListener('click',()=>selectSpread(btn.dataset.spread)));
+      select.addEventListener('change',()=>selectSpread(select.value));
+      selectSpread('mechanism');
+    }
+    function selectSpread(id) {
+      const spread = spreads.find(s=>s.id===id) || spreads[1];
+      document.querySelector('#spreadSelect').value = spread.id;
+      document.querySelectorAll('.spread-option').forEach(b=>b.classList.toggle('active',b.dataset.spread===spread.id));
+      document.querySelector('#spreadTheoryTitle').textContent = `${spread.name}｜${spread.level}`;
+      document.querySelector('#spreadTheoryText').textContent = spread.theory;
+    }
+    function sampleDeck(deck,n) {
+      const copy=[...deck];
+      for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
+      return copy.slice(0,n);
+    }
+    let currentReading=[];
+    function drawReading() {
+      const spread = spreads.find(s=>s.id===document.querySelector('#spreadSelect').value) || spreads[1];
+      const scope = document.querySelector('#deckScope').value;
+      const pool = scope==='major' ? deck78.filter(c=>c.type==='major') : scope==='minor' ? minorCards : deck78;
+      const useRev = document.querySelector('#useReversal').checked;
+      currentReading = sampleDeck(pool,spread.positions.length).map((card,i)=>({card,position:spread.positions[i],reversed:useRev&&Math.random()<.35}));
+      const board=document.querySelector('#readingBoard');
+      board.style.setProperty('--spread-cols',Math.min(spread.positions.length,5));
+      board.innerHTML=currentReading.map((x,i)=>{const hint=cardHint(x.card,x.reversed);return `<article class="draw-slot"><div class="slot-label">${i+1}. ${escapeHtml(x.position)}</div><div class="draw-card-art">${cardArt(x.card,x.reversed)}</div><div class="draw-name">${escapeHtml(x.card.cn)}${x.reversed?' · 逆位':''}</div><div class="draw-meta">${escapeHtml(x.card.type==='major'?'大阿尔卡那':`${x.card.element}元素`)}</div><div class="draw-hint"><b>核心：</b>${escapeHtml(hint.base)}<br><b>结构：</b>${escapeHtml(hint.structure)}<br><b>位置化：</b>把它翻译成“${escapeHtml(x.position)}正在如何运作”。<br><b>方向：</b>${escapeHtml(hint.reverse)}</div></article>`}).join('');
+      ['#revealHints','#buildReference','#saveReading'].forEach(s=>document.querySelector(s).disabled=false);
+      document.querySelector('#referenceReading').innerHTML='<b>先独立解读，再生成结构化参考</b><ol><li>每张牌只写一个位置化动词。</li><li>圈出最强的递进、冲突或修复关系。</li><li>补上一句“仅凭牌面不能确定……”</li></ol>';
+    }
+    function revealHints() { document.querySelectorAll('.draw-hint').forEach(x=>x.classList.add('show')); }
+    function buildReference() {
+      if(!currentReading.length)return;
+      const majors=currentReading.filter(x=>x.card.type==='major').length;
+      const elements=currentReading.filter(x=>x.card.type==='minor').reduce((m,x)=>(m[x.card.element]=(m[x.card.element]||0)+1,m),{});
+      const elementText=Object.entries(elements).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}${v}张`).join('、')||'本次全为大牌';
+      const lines=currentReading.map(x=>`<li><b>${escapeHtml(x.position)}｜${escapeHtml(x.card.cn)}${x.reversed?'逆位':''}</b>：${escapeHtml(cardHint(x.card,x.reversed).base)}。先把这一机制限定在该位置，不扩写具体人物或事件。</li>`).join('');
+      const relation=currentReading.length===1?'单牌重点是同一核心动作如何被问题位置改写。':`先检查相邻牌是递进、冲突还是修复；当前大牌 ${majors} 张，元素分布为 ${elementText}。密度只能提出关注点，不能决定结果。`;
+      document.querySelector('#referenceReading').innerHTML=`<b>结构化参考，不是唯一答案</b><ol>${lines}</ol><p><b>组合层：</b>${escapeHtml(relation)}</p><p><b>边界层：</b>本组牌可以帮助组织当前机制、关注点与行动假设；不能单独证明他人隐私动机、确定时间、医学/法律事实或不可改变的结局。</p>`;
+    }
+    const readingLog=JSON.parse(localStorage.getItem('tarot-reading-log')||'[]');
+    function saveReading() {
+      if(!currentReading.length)return;
+      readingLog.unshift({date:new Date().toLocaleString('zh-CN'),question:document.querySelector('#readingQuestion').value.trim()||'未命名练习',spread:document.querySelector('#spreadSelect').selectedOptions[0].textContent,cards:currentReading.map(x=>`${x.position}：${x.card.cn}${x.reversed?'逆位':''}`),note:document.querySelector('#learnerReading').value.trim()});
+      readingLog.splice(12);
+      localStorage.setItem('tarot-reading-log',JSON.stringify(readingLog)); renderJournal();
+    }
+    function renderJournal(){const box=document.querySelector('#readingJournal');box.innerHTML=readingLog.length?`<div class="field-title">最近保存的练习（本机）</div>${readingLog.map(x=>`<details><summary>${escapeHtml(x.date)}｜${escapeHtml(x.question)}</summary><p><b>${escapeHtml(x.spread)}</b><br>${x.cards.map(escapeHtml).join('<br>')}</p>${x.note?`<p><b>我的解读：</b>${escapeHtml(x.note)}</p>`:''}</details>`).join('')}`:'';}
+    function renderCards() {
+      const shown = cards.filter(matches);
+      resultCount.textContent = `显示 ${shown.length} / ${cards.length} 张大牌`;
+      grid.innerHTML = shown.length ? shown.map(card => `
+        <button class="tarot-card ${learned.has(card.n)?'learned':''}" data-card="${escapeHtml(card.n)}" type="button" aria-label="打开${escapeHtml(card.cn)}的知识卡">
+      <div class="card-visual"><span class="roman">${escapeHtml(card.n)}</span><span class="learned-dot">已学习</span>${cardArt({...card,type:'major'},false)}</div>
+          <div class="card-body"><h3>${escapeHtml(card.cn)}</h3><div class="en">${escapeHtml(card.en)}</div><p class="action">${escapeHtml(card.action)}</p><div class="tags">${card.keys.slice(0,3).map(k=>`<span class="tag">${escapeHtml(k)}</span>`).join('')}</div></div>
+        </button>`).join('') : '<div class="empty">没有匹配的牌。试试更短的关键词，例如“观察”“结束”或“规则”。</div>';
+      grid.querySelectorAll('[data-card]').forEach(btn => btn.addEventListener('click', () => openCard(btn.dataset.card)));
+      updateProgress();
+    }
+    function openCard(n) {
+      activeCard = cards.find(c => c.n === n);
+      if (!activeCard) return;
+      dialogTitle.textContent = `${activeCard.n} · ${activeCard.cn}`;
+      dialogSubtitle.textContent = activeCard.en;
+      const adv = advanced[activeCard.n];
+      dialogBody.innerHTML = `<div class="modal-layout">
+        <div class="modal-image-wrap">${cardArt({...activeCard,type:'major',id:`major:${cards.indexOf(activeCard)}`},false)}<p class="source-note">Rider–Waite–Smith，1909，公版</p></div>
+        <div><div class="level-tabs" role="tablist" aria-label="学习层级"><button class="level-tab active" data-level="basic" role="tab" aria-selected="true">基础</button><button class="level-tab" data-level="advanced" role="tab" aria-selected="false">进阶</button><button class="level-tab" data-level="expert" role="tab" aria-selected="false">高阶</button></div>
+        <section class="level-panel" data-panel="basic">
+          <div class="info-block info-core"><h4>核心动作</h4><p><strong>${escapeHtml(activeCard.action)}</strong></p><div class="tags">${activeCard.keys.map(k=>`<span class="tag">${escapeHtml(k)}</span>`).join('')}</div></div>
+          <div class="info-block info-risk"><h4>常见误区</h4><p>${escapeHtml(activeCard.pit)}</p></div>
+          <div class="info-block info-safe"><h4>关系语境中的稳妥解读</h4><p>${escapeHtml(activeCard.rel)}</p></div>
+          <div class="info-block"><h4>工作语境中的稳妥解读</h4><p>${escapeHtml(activeCard.work)}</p></div>
+          <div class="info-block"><h4>与相似牌的区分</h4><p>${escapeHtml(activeCard.cmp)}</p></div>
+        </section>
+        <section class="level-panel" data-panel="advanced" hidden>
+          <div class="info-block info-core"><h4>图像观察：先看见，再解释</h4><ul class="symbol-list">${adv.symbols.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ul></div>
+          <div class="info-block"><h4>组合与轴线</h4><p>${escapeHtml(adv.combo)}</p></div>
+          <div class="info-block info-safe"><h4>进阶练习</h4><p>分别把本牌放在“原因 / 建议 / 趋势”三个位置，各写一句；比较动词如何变化，并删掉新增的剧情。</p></div>
+        </section>
+        <section class="level-panel" data-panel="expert" hidden>
+          <div class="info-block info-core"><h4>竞争性解释与机制</h4><p>${escapeHtml(adv.high)}</p></div>
+          <div class="info-block info-risk"><h4>可证伪问题</h4><p>${escapeHtml(adv.test)}</p></div>
+          <div class="info-block"><h4>高阶记录框架</h4><p>牌面证据 → 解释A / 解释B → 各自需要的现实证据 → 可能反证 → 当前置信度（低/中/高）→ 后续复盘日期。</p></div>
+        </section>
+        <div class="modal-actions"><span style="color:var(--muted);font-size:13px">标记只保存在当前浏览器</span><button id="learnBtn" class="ghost-btn learn-btn ${learned.has(activeCard.n)?'learned':''}" type="button">${learned.has(activeCard.n)?'✓ 已标记学习':'标记为已学习'}</button></div></div></div>`;
+      document.querySelector('#learnBtn').addEventListener('click', toggleLearned);
+      dialogBody.querySelectorAll('.level-tab').forEach(tab => tab.addEventListener('click', () => {
+        dialogBody.querySelectorAll('.level-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+        tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+        dialogBody.querySelectorAll('.level-panel').forEach(p => p.hidden = p.dataset.panel !== tab.dataset.level);
+      }));
+      dialog.showModal();
+    }
+    function toggleLearned() {
+      if (!activeCard) return;
+      if (learned.has(activeCard.n)) learned.delete(activeCard.n); else learned.add(activeCard.n);
+      localStorage.setItem('tarot-learned', JSON.stringify([...learned]));
+      renderCards();
+      openCard(activeCard.n);
+    }
+    function updateProgress() {
+      const count = learned.size;
+      document.querySelector('#progressText').textContent = `已学 ${count} / ${cards.length}`;
+      document.querySelector('#progressFill').style.width = `${count/cards.length*100}%`;
+    }
+    document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active'); activeFilter = btn.dataset.filter; renderCards();
+    }));
+    search.addEventListener('input', renderCards);
+    dialog.querySelector('.close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+
+    let quizIndex = -1;
+    const quizWrong = new Set(JSON.parse(localStorage.getItem('tarot-quiz-wrong')||'[]'));
+    let quizDone = Number(localStorage.getItem('tarot-quiz-done')||0);
+    function quizPool(){const l=document.querySelector('#quizLevel').value,t=document.querySelector('#quizTopic').value,m=document.querySelector('#quizMode').value;return quizzes.filter(x=>(l==='all'||x.l===l)&&(t==='all'||x.t===t)&&(m!=='wrong'||quizWrong.has(x.id)));}
+    function updateQuizStat(){document.querySelector('#quizStat').textContent=`已作答 ${quizDone} 题 · 错题 ${quizWrong.size} 题 · 题库共 ${quizzes.length} 题`;}
+    document.querySelector('#newQuiz').addEventListener('click', () => {
+      const pool=quizPool(); if(!pool.length){document.querySelector('#quizQuestion').textContent='当前筛选没有题目；如果选择了“只练错题”，请先在普通题目中加入错题。';return;}
+      let item; do { item=pool[Math.floor(Math.random()*pool.length)]; } while(pool.length>1&&item.id===quizIndex); quizIndex=item.id;
+      document.querySelector('#quizTitle').textContent = `${item.l}｜${item.t}｜第 ${item.id} 题`;
+      document.querySelector('#quizQuestion').textContent = item.q;
+      document.querySelector('#quizAnswer').style.display = 'none';
+      document.querySelector('#selfGrade').classList.remove('show');
+      document.querySelector('#showAnswer').disabled = false;
+    });
+    document.querySelector('#showAnswer').addEventListener('click', () => {
+      const box = document.querySelector('#quizAnswer');
+      const item=quizzes.find(x=>x.id===quizIndex); if(!item)return;
+      box.innerHTML = `<strong>参考答案</strong><br>${escapeHtml(item.a)}<div class="answer-structure">${item.s.split('｜').map((x,i)=>`<div><b>${['评分点一','评分点二','评分点三'][i]}</b>${escapeHtml(x)}</div>`).join('')}</div>`;
+      box.style.display = 'block';
+      document.querySelector('#selfGrade').classList.add('show');
+    });
+    document.querySelectorAll('[data-grade]').forEach(btn=>btn.addEventListener('click',()=>{if(quizIndex<0)return;quizDone++;if(btn.dataset.grade==='wrong'||btn.dataset.grade==='partial')quizWrong.add(quizIndex);else quizWrong.delete(quizIndex);localStorage.setItem('tarot-quiz-wrong',JSON.stringify([...quizWrong]));localStorage.setItem('tarot-quiz-done',quizDone);updateQuizStat();document.querySelector('#newQuiz').click();}));
+    document.querySelector('#drawCards').addEventListener('click',drawReading);
+    document.querySelector('#revealHints').addEventListener('click',revealHints);
+    document.querySelector('#buildReference').addEventListener('click',buildReference);
+    document.querySelector('#saveReading').addEventListener('click',saveReading);
+    renderSpreadCatalog(); renderJournal(); updateQuizStat();
+    renderCards();
+  </script>
+</body>
+</html>
